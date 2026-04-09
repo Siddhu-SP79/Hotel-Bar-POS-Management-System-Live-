@@ -1,2 +1,2 @@
-# Hotel-Bar-POS-Management-System-Live-
+# Hotel & Bar-POS-Management-System-Live
 Developed a full-scale POS system.
