@@ -29,32 +29,3 @@ A full-scale, production-ready Point-of-Sale (POS) application designed specific
 The billing and inventory engines rely on structured relational constraints to maintain high data integrity. Below is an architectural overview of how menu variants and inventory are mapped inside the system:
 
 ```sql
--- 1. Master Inventory Stock Tracking
-CREATE TABLE inventory_stock (
-    item_id INT AUTO_INCREMENT PRIMARY KEY,
-    item_name VARCHAR(150) NOT NULL,
-    current_stock_volume DECIMAL(10,2) NOT NULL, -- Tracked in ml or unit counts
-    minimum_threshold_limit INT DEFAULT 10,
-    last_updated_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- 2. Liquid/Menu Variant Mapping Layout
-CREATE TABLE item_variants (
-    variant_id INT AUTO_INCREMENT PRIMARY KEY,
-    item_id INT,
-    variant_name VARCHAR(50) NOT NULL, -- e.g., '30ml', '60ml', 'Bottle'
-    volume_value_ml INT DEFAULT 0,     -- Numeric breakdown used for auto-deduction logic
-    selling_price DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (item_id) REFERENCES inventory_stock(item_id) ON DELETE CASCADE
-);
-
--- 3. Sales Order Processing Workflow
-CREATE TABLE bill_transactions (
-    transaction_id VARCHAR(50) PRIMARY KEY,
-    table_number INT NOT NULL,
-    sub_total DECIMAL(10,2) NOT NULL,
-    tax_percentage DECIMAL(5,2) DEFAULT 18.00,
-    grand_total DECIMAL(10,2) NOT NULL,
-    payment_mode ENUM('Cash', 'UPI', 'Card') NOT NULL,
-    settled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
