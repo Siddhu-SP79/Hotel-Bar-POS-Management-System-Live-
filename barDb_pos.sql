@@ -1,0 +1,105 @@
+--create database os2;
+--use os2;
+---- 1. Products (Brands) Table: (No change)
+--CREATE TABLE IF NOT EXISTS products (
+--    id INT PRIMARY KEY AUTO_INCREMENT,
+--    name VARCHAR(255) NOT NULL UNIQUE,
+--    rack_id VARCHAR(50),
+--    image_filename VARCHAR(255),
+--    barcode_id VARCHAR(255) UNIQUE 
+--);
+--
+---- 2. Variants (Sizes/Prices) Table: (No change)
+--CREATE TABLE IF NOT EXISTS variants (
+--    id INT PRIMARY KEY AUTO_INCREMENT,
+--    product_id INT NOT NULL,
+--    size_ml INT NOT NULL,
+--    price DECIMAL(10, 2) NOT NULL, 
+--    counter_qty INT NOT NULL DEFAULT 0,
+--    store_qty INT NOT NULL DEFAULT 0,
+--    min_stock INT NOT NULL DEFAULT 10,
+--    barcode_id VARCHAR(255) UNIQUE, 
+--    FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE,
+--    mrp_price DOUBLE DEFAULT 0.0
+--);
+--
+---- 3. NEW: Food Items Table
+--CREATE TABLE IF NOT EXISTS food_items (
+--    id INT PRIMARY KEY AUTO_INCREMENT,
+--    name VARCHAR(255) NOT NULL UNIQUE,
+--    category VARCHAR(100) NOT NULL,
+--    price DECIMAL(10, 2) NOT NULL,
+--    image_filename VARCHAR(255),
+--    is_available TINYINT(1) NOT NULL DEFAULT 1 -- To toggle food availability
+--);
+--
+---- 4. Final Bills Table (Closed orders) - (No change)
+--CREATE TABLE IF NOT EXISTS bills (
+--    id INT PRIMARY KEY AUTO_INCREMENT,
+--    manager_name VARCHAR(100) NOT NULL,
+--    table_no INT NOT NULL,
+--    payment_mode VARCHAR(50) NOT NULL,
+--    total DECIMAL(10, 2),
+--    cgst DECIMAL(10, 2),
+--    sgst DECIMAL(10, 2),
+--    bill_time DATETIME DEFAULT CURRENT_TIMESTAMP
+--);
+--
+---- 5. Bill Items Table (Items in closed bills)
+--CREATE TABLE IF NOT EXISTS bill_items (
+--    id INT PRIMARY KEY AUTO_INCREMENT,
+--    bill_id INT NOT NULL,
+--    variant_id INT NULL, -- Was NOT NULL, now nullable
+--    food_item_id INT NULL, -- NEW
+--    qty INT NOT NULL,
+--    price_per_unit DECIMAL(10, 2) NOT NULL,
+--    amount DECIMAL(10, 2) NOT NULL,
+--    FOREIGN KEY(bill_id) REFERENCES bills(id) ON DELETE CASCADE,
+--    FOREIGN KEY(variant_id) REFERENCES variants(id) ON DELETE CASCADE,
+--    FOREIGN KEY(food_item_id) REFERENCES food_items(id) ON DELETE CASCADE,
+--    -- Ensures an item is either a food or a variant, but not both
+--    CONSTRAINT chk_item_type CHECK (variant_id IS NOT NULL OR food_item_id IS NOT NULL)
+--);
+--
+---- 6. Open Orders Table (Active tables/orders) - (No change)
+--CREATE TABLE IF NOT EXISTS open_orders (
+--    id INT PRIMARY KEY AUTO_INCREMENT,
+--    table_no INT NOT NULL UNIQUE,
+--    manager_name VARCHAR(100) NOT NULL,
+--    start_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+--    payment_mode VARCHAR(50),
+--    status VARCHAR(50) NOT NULL DEFAULT 'OPEN'
+--);
+--
+---- 7. Open Order Items Table (Items currently served/ordered)
+---- *** MODIFIED: Now supports EITHER a variant_id OR a food_item_id ***
+--CREATE TABLE IF NOT EXISTS open_order_items (
+--    id INT PRIMARY KEY AUTO_INCREMENT,
+--    order_id INT NOT NULL,
+--    variant_id INT NULL, -- Was NOT NULL, now nullable
+--    food_item_id INT NULL, -- NEW
+--    qty INT NOT NULL,
+--    price_per_unit DECIMAL(10, 2) NOT NULL,
+--    amount DECIMAL(10, 2) NOT NULL,
+--    is_kot_printed TINYINT(1) NOT NULL DEFAULT 0, 
+--    FOREIGN KEY(order_id) REFERENCES open_orders(id) ON DELETE CASCADE,
+--    FOREIGN KEY(variant_id) REFERENCES variants(id) ON DELETE CASCADE,
+--    FOREIGN KEY(food_item_id) REFERENCES food_items(id) ON DELETE CASCADE,
+--    -- Ensures an item is either a food or a variant, but not both
+--    CONSTRAINT chk_open_item_type CHECK (variant_id IS NOT NULL OR food_item_id IS NOT NULL)
+--);
+--
+---- 8. Stock Transfer History Table (Required for Inventory History Panel)
+--CREATE TABLE IF NOT EXISTS stock_transfer_history (
+--    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+--    transfer_date TEXT NOT NULL,
+--    variant_barcode_id VARCHAR(255) NOT NULL,
+--    transfer_qty INT NOT NULL,
+--    source_location VARCHAR(50) NOT NULL,
+--    target_location VARCHAR(50) NOT NULL,
+--    prev_counter_qty INT NOT NULL,
+--    prev_store_qty INT NOT NULL,
+--    new_counter_qty INT NOT NULL,
+--    new_store_qty INT NOT NULL,
+--   FOREIGN KEY(variant_barcode_id) REFERENCES variants(barcode_id)
+--);
